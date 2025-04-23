@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XYWatch OTA Update</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .step-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #connectStatus {
+            margin-left: 15px;
+            color: #28a745;
+            font-weight: bold;
+        }
+        #progress {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            color: #495057;
+        }
+        .file-input {
+            margin: 15px 0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .connected {
+            background-color: #28a745;
+        }
+        .disconnected {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #333; margin-bottom: 30px;">XYWatch OTA Update</h1>
+        
+        <div class="step">
+            <div class="step-title">1. Connect to XYWatch-OTA</div>
+            <button onclick="connectBLE()" id="connectButton">Connect</button>
+            <span id="connectStatus">
+                <span class="status-indicator disconnected"></span>
+                Disconnected
+            </span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Upload Firmware</div>
+            <div class="file-input">
+                <input type="file" id="firmware" accept=".bin" />
+            </div>
+            <button onclick="uploadFirmware()" id="uploadButton" disabled>Upload</button>
+            <div id="progress"></div>
+        </div>
+    </div>
+
+<script>
+const SERVICE_UUID = "0000ffc0-0000-1000-8000-00805f9b34fb";
+const CHAR_UUID = "0000ffc1-0000-1000-8000-00805f9b34fb";
+let characteristic;
+let device;
+
+async function connectBLE() {
+    try {
+        device = await navigator.bluetooth.requestDevice({
+            filters: [{ name: 'XYWatch-OTA' }],
+            optionalServices: [SERVICE_UUID]
+        });
+        
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(SERVICE_UUID);
+        characteristic = await service.getCharacteristic(CHAR_UUID);
+        
+        document.getElementById('connectStatus').innerHTML = 
+            '<span class="status-indicator connected"></span>Connected!';
+        document.getElementById('uploadButton').disabled = false;
+        document.getElementById('connectButton').disabled = true;
+        
+        device.addEventListener('gattserverdisconnected', onDisconnected);
+    } catch (error) {
+        document.getElementById('connectStatus').innerHTML = 
+            '<span class="status-indicator disconnected"></span>Connection failed: ' + error.message;
+    }
+}
+
+function onDisconnected() {
+    document.getElementById('connectStatus').innerHTML = 
+        '<span class="status-indicator disconnected"></span>Disconnected';
+    document.getElementById('uploadButton').disabled = true;
+    document.getElementById('connectButton').disabled = false;
+}
+
+async function uploadFirmware() {
+    const file = document.getElementById('firmware').files[0];
+    if (!file) {
+        alert('Please select a firmware file first');
+        return;
+    }
+    
+    const firmware = await file.arrayBuffer();
+    document.getElementById('uploadButton').disabled = true;
+    
+    try {
+        // 发送文件大小
+        const sizeBuffer = new ArrayBuffer(4);
+        new DataView(sizeBuffer).setUint32(0, firmware.byteLength, true);
+        await characteristic.writeValue(sizeBuffer);
+        
+        // 分片发送
+        const chunkSize = 512;
+        const totalChunks = Math.ceil(firmware.byteLength / chunkSize);
+        let startTime = Date.now();
+        let chunkIndex = 0;
+        
+        for(let i = 0; i < firmware.byteLength; i += chunkSize) {
+            chunkIndex++;
+            const chunk = firmware.slice(i, i + chunkSize);
+            await characteristic.writeValue(chunk);
+            
+            const endTime = Date.now();
+            const duration = (endTime - startTime);
+            const avgSpeed = (chunkIndex / duration);
+            const remainingTime = Math.floor((totalChunks - chunkIndex) / avgSpeed / 1000);
+            
+            let remainingTimeStr = '';
+            if (remainingTime > 60) { 
+                remainingTimeStr = `${Math.floor(remainingTime / 60)}m ${remainingTime % 60}s`;
+            } else {
+                remainingTimeStr = `${remainingTime}s`;
+            }
+            
+            const progress = (i * 100 / firmware.byteLength).toFixed(2);
+            document.getElementById('progress').textContent = 
+                `Progress: ${progress}%, Remaining: ${remainingTimeStr}`;
+        }
+        
+        document.getElementById('progress').textContent = 'Upload complete!';
+        document.getElementById('progress').style.color = '#28a745';
+    } catch (error) {
+        document.getElementById('progress').textContent = 'Upload failed: ' + error.message;
+        document.getElementById('progress').style.color = '#dc3545';
+    } finally {
+        document.getElementById('uploadButton').disabled = false;
+    }
+}
+</script>
+</body>
+</html>
