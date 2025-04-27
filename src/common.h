@@ -64,7 +64,8 @@
 
 #include "ntp/ntp.h"
 #include "wifiutil.h"
-#include "bleota.h"
+#include "ota/bleota.h"
+#include "ota/netota.h"
 #include "weather/weather.h"
 
 #endif /* COMMON_H_ */

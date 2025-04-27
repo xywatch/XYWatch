@@ -251,7 +251,6 @@ void stopBLEOTA() {
     // BLEDevice::deinit(true);
 }
 
-
 extern bool keep_on;
 
 uint8_t ble_y = 0;

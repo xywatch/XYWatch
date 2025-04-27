@@ -8,6 +8,7 @@ typedef struct
 
 void console_loop_show(void);
 void console_log(unsigned short time_delay, const char *fmt, ...);
+void console_log_no_scroll(unsigned short time_delay, const char *fmt, ...);
 bool up_line(void);
 bool down_line(void);
 void console_init(void);

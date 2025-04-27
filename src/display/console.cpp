@@ -239,48 +239,29 @@ void console_log(unsigned short time_delay, const char *fmt, ...)
 #endif
 }
 
-/////////还没有添加新行功能
-// void console_log_strbuff(unsigned short time_delay ,char* str)
-//{
+// TODO 如果行超过了, 要上移
+void console_log_no_scroll(unsigned short time_delay, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    vsprintf(firststr_buff, fmt, ap);
+    va_end(ap);
 
-//	sprintf(string_buff[console_line_index].str_buff,str);
-//
-//
-//	now_str_length=strlen((const char*)string_buff[console_line_index].str_buff);
-//	if(now_str_length<last_str_length)
-//	{
-//		for(char i=0;i<last_str_length-now_str_length;i++)
-//		{
-//			strcat(string_buff[console_line_index].str_buff," ");
-//		}
-//	}
-//	last_str_length=now_str_length;
-//
-//	console_line_index++;
-//	if(console_line_index>=LINE_MAX)
-//	{
-//		console_line_index=0;
-//		new_line_flag=1;
-//	}
-//
-//	if(new_line_flag==0)
-//	{
-//		gui_print_s(0,LINE(console_line_index),string_buff[console_line_index-1].str_buff);
-//	}
-//	else
-//	{
-//		char show_index=console_line_index;
-//		for(char c=1;c<=LINE_MAX;c++)  //显示所有行
-//		{
-//			gui_print_s(0,LINE(c),string_buff[show_index].str_buff);  //依次从第一行显示到第八行
-//			show_index++;
-//			if(show_index>=LINE_MAX)show_index=0;
-//		}
-//
-//	}
-//
-//	OLED_Flush();
-//
-//	delay_ms(time_delay);
-//
-//}
+    // 更新行缓冲区
+    if (console_line_index < LINE_BUF_MAX)
+    {
+        strcopy_cnt(string_buff[console_line_index].str_buff, firststr_buff, LINE_CHAR_CNT);
+    }
+
+    // 把之后的清空掉
+    memset(oledBuffer + LINE(console_line_index + 1) * 16, 0x00, 128); // console_line_index *128
+    // 固定显示模式，只更新最后一行
+    gui_print_s(0, LINE(console_line_index + 1), string_buff[console_line_index].str_buff);
+
+    OLED_Flush();
+
+    if (time_delay > 0)
+    {
+        delay(time_delay);
+    }
+}
