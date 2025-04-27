@@ -106,12 +106,11 @@ typedef struct
 
 typedef struct
 {
-	unsigned char hour;
-	unsigned char min;
-	float temp;
-	unsigned char shidu;
-	int height;
-} HistoryData;
+    byte year;
+	month_t month;
+	byte date;
+	uint32_t stepCount;
+} stepLogData_s;
 
 typedef enum
 {
@@ -156,6 +155,7 @@ typedef struct
 		};
 	};
 } alarm_s;
+
 
 // Could use bitfields for the bools to save a few bytes of RAM and EEPROM, but uses an extra ~82 bytes of flash
 typedef struct

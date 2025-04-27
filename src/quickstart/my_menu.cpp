@@ -7,10 +7,11 @@
 #define Setup_WiFi "Setup WiFi"
 #define Setup_WiFi_BLE "Setup By BLE"
 #define Update_Firmware "Update Firmware"
-#define About "Info"
+#define StepLog "Step Log"
+#define About "About"
 #define CMD5_NAME "Back"
 
-#define OPTION_COUNT 7
+#define OPTION_COUNT 8
 
 static void mSelect()
 {
@@ -62,6 +63,7 @@ static void itemLoader(byte num)
     setMenuOption_P(num++, PSTR(Setup_WiFi_BLE), NULL, showBLESetting);
 
     setMenuOption_P(num++, PSTR(Update_Firmware), NULL, showUpdateFirmware);
+    setMenuOption_P(num++, PSTR(StepLog), NULL, showStepLog);
     setMenuOption_P(num++, PSTR(About), NULL, showAbout);
     // setMenuOption_P(num++, buff, NULL, LogTimeUpdate);
 

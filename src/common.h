@@ -53,6 +53,7 @@
 
 #include "quickstart/my_menu.h"
 #include "quickstart/about.h"
+#include "quickstart/step_log.h"
 
 #include "rtc/rtc.h"
 

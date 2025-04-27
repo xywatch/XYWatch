@@ -16,5 +16,7 @@ void appconfig_init(void);
 void appconfig_save(void);
 void appconfig_init_alarm();
 void appconfig_save_alarm();
+void appconfig_save_step_log();
+void appconfig_init_step_log();
 
 #endif /* APPCONFIG_H_ */

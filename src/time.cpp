@@ -216,6 +216,7 @@ void time_update()
     RTC.readDatetime(timeDate);
 
     // RTC读出来的是24小时时间, 转为设置的12或24小时时间
+    byte hour = timeDate.time.hour; // 避免转成12小时制, 下面resetStepCounter需要判断
     timeDate.time.ampm = CHAR_24;
 	time_timeMode(&timeDate.time, appConfig.timeMode);
 
@@ -234,7 +235,8 @@ void time_update()
         Serial.println("整点报时");
 
         // 如果是在0点0分, 则需要reset step count
-        if (timeDate.time.hour == 0) {
+        if (hour == 0) {
+            addStepLog();
             resetStepCounter();
         }
     }

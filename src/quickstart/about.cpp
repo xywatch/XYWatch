@@ -5,8 +5,8 @@ extern float VBAT;
 static display_t draw() {
     u8 y = 0;
     draw_string(PSTR("User: " USER_NAME), false, 0, y);
-    // draw_string(PSTR("FW: " FW_VERSION), false, 0, y += 8);
-    draw_string(PSTR("HW: " HW_VERSION), false, 0, y += 8);
+    draw_string(PSTR("FW: " FW_VERSION), false, 0, y += 8);
+    // draw_string(PSTR("HW: " HW_VERSION), false, 0, y += 8);
     // y += 10;
     // draw_fill_screen(0, y, 127, y, 1);
     // y += 2;

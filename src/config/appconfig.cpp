@@ -3,6 +3,7 @@
 
 RTC_DATA_ATTR appconfig_s appConfig; // appconfig_s的长度为8
 extern alarm_s eepAlarms[];
+extern stepLogData_s stepLogs[];
 
 // 写到nvs中
 void appconfig_save()
@@ -218,6 +219,46 @@ void appconfig_init_alarm()
     err = nvs_get_blob(handle, "alarms", &eepAlarms, &len);
     if (err == ESP_OK) {
         Serial.printf("eepAlarm 0 %d, %d:%d\n", eepAlarms[0].enabled, eepAlarms[0].hour, eepAlarms[0].min);
+    }
+
+    nvs_close(handle);
+}
+
+void appconfig_save_step_log()
+{
+    nvs_handle_t handle;
+    // 打开命名空间
+    esp_err_t err = nvs_open("stepLogs", NVS_READWRITE, &handle);
+    if (err != ESP_OK) {
+        Serial.printf("nvs_open NVS_READWRITE stepLog error: %d, %s\n", err, esp_err_to_name(err)); // 4354, ESP_ERR_NVS_NOT_FOUND, 第一次没有这个命名空间, 所以要先写一次
+        return;
+    }
+
+    nvs_set_blob(handle, "stepLogs", stepLogs, sizeof(stepLogData_s) * STEP_LOG_COUNT);
+
+    // 提交更改
+    nvs_commit(handle);
+    
+    // 关闭句柄
+    nvs_close(handle);
+
+    Serial.printf("nvs save stepLogs ok\n");
+}
+
+void appconfig_init_step_log()
+{
+    nvs_handle_t handle;
+    esp_err_t err = nvs_open("stepLogs", NVS_READONLY, &handle);
+    if (err != ESP_OK) {
+        Serial.printf("nvs_open stepLogs error: %d, %s\n", err, esp_err_to_name(err)); // 4354, ESP_ERR_NVS_NOT_FOUND, 第一次没有这个命名空间, 所以要先写一次
+        appconfig_save_step_log();
+        return;
+    }
+
+    size_t len = sizeof(stepLogData_s) * STEP_LOG_COUNT;
+    err = nvs_get_blob(handle, "stepLogs", &stepLogs, &len);
+    if (err == ESP_OK) {
+        Serial.printf("stepLogs 0 %d, %d-%d\n", stepLogs[0].stepCount, stepLogs[0].month, stepLogs[0].date);
     }
 
     nvs_close(handle);

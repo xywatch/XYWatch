@@ -274,6 +274,8 @@ bool bmaConfig()
     // bma4_read_regs(BMA4_POWER_CTRL_ADDR, &data, 1, sensor.getDevFptr());
     // Serial.printf("BMA423 power ctrl: %d\n", data); // 0
 
+    appconfig_init_step_log();
+
     return true;
 }
 
