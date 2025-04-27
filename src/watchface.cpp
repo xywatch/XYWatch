@@ -445,58 +445,89 @@ void drawBattery()
 
     // 根据电量百分比选择电池图标
     int8_t batteryLevel = 0;
-    // float VBAT = getBatteryVoltage();
-    if (VBAT > 4.1)
+    
+    // 更细致的电压到电量的映射关系
+    // 锂电池的电压与电量关系通常是非线性的
+    // 满电约4.2V，空电约3.3V
+    if (VBAT > 4.15)
     {
-        batteryLevel = 37; // level 37 表示满电
+        batteryLevel = 99; // 满电
         battIcon = battIconFull;
     }
-    else if (VBAT > 4.05 && VBAT <= 4.1)
+    else if (VBAT > 4.1)
     {
-        batteryLevel = 33;
+        batteryLevel = 95;
         battIcon = battIconFull;
     }
-    else if (VBAT > 4 && VBAT <= 4.05)
+    else if (VBAT > 4.05)
     {
-        batteryLevel = 28;
+        batteryLevel = 90;
+        battIcon = battIconFull;
+    }
+    else if (VBAT > 4.0)
+    {
+        batteryLevel = 85;
+        battIcon = battIconFull;
+    }
+    else if (VBAT > 3.95)
+    {
+        batteryLevel = 80;
+        battIcon = battIconFull;
+    }
+    else if (VBAT > 3.9)
+    {
+        batteryLevel = 70;
         battIcon = battIconHigh;
     }
-    else if (VBAT > 3.95 && VBAT <= 4)
+    else if (VBAT > 3.85)
     {
-        batteryLevel = 23;
+        batteryLevel = 60;
         battIcon = battIconHigh;
     }
-    else if (VBAT > 3.9 && VBAT <= 3.95)
+    else if (VBAT > 3.8)
     {
-        batteryLevel = 18;
+        batteryLevel = 50;
+        battIcon = battIconHigh;
+    }
+    else if (VBAT > 3.75)
+    {
+        batteryLevel = 40;
+        battIcon = battIconHigh;
+    }
+    else if (VBAT > 3.7)
+    {
+        batteryLevel = 30;
         battIcon = battIconLow;
     }
-    else if (VBAT > 3.85 && VBAT <= 3.9)
+    else if (VBAT > 3.65)
     {
-        batteryLevel = 13;
+        batteryLevel = 25;
         battIcon = battIconLow;
     }
-    else if (VBAT > 3.8 && VBAT <= 3.85)
+    else if (VBAT > 3.6)
     {
-        batteryLevel = 8;
+        batteryLevel = 20;
         battIcon = battIconLow;
     }
-    else if (VBAT > 3.75 && VBAT <= 3.8)
+    else if (VBAT > 3.55)
     {
-        batteryLevel = 4;
+        batteryLevel = 15;
         battIcon = battIconLow;
     }
-    else if (VBAT <= 3.75)
+    else if (VBAT > 3.5)
+    {
+        batteryLevel = 10;
+        battIcon = battIconLow;
+    }
+    else if (VBAT > 3.45)
+    {
+        batteryLevel = 5;
+        battIcon = battIconLow;
+    }
+    else
     {
         batteryLevel = 0;
         battIcon = battIconEmpty;
-    }
-
-    // 计算电量百分比
-    // float bat = (4.1 - VBAT) / 4.1 * 100;
-    u_int8_t bat = (u_int8_t)((float)batteryLevel/37.0 * 100);
-    if (bat >= 100) {
-        bat = 99;
     }
 
     // 如果在充电, 则绘制充电的图标
@@ -512,10 +543,10 @@ void drawBattery()
     }
 
     // 显示电量百分比
-    sprintf((char *)ad, "%d", (int)bat);
+    sprintf((char *)ad, "%d", batteryLevel);
     draw_string(ad, NOINVERT, 18, FRAME_HEIGHT - 8);
 
-    // Serial.printf("VBAT: %f, bat: %f\n", VBAT, bat);
+    // Serial.printf("VBAT: %f, bat: %d\n", VBAT, batteryLevel);
 }
 
 void drawStep(byte x) {
